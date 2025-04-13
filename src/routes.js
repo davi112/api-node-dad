@@ -20,6 +20,7 @@ router.put('/books/:id', BookController.update);
 
 router.get('/authors',AuthorController.index);
 router.get('/authors/:id', AuthorController.show);
+router.get('/authors/:id/books', AuthorController.showBooks);
 router.delete('/authors/:id', AuthorController.delete);
 router.post('/authors/', AuthorController.store);
 router.put('/authors/:id', AuthorController.update);

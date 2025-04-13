@@ -39,7 +39,7 @@ class BookController {
 
     async update(request, response) {
       const { id } = request.params;
-      const { titulo, sinopse, numPaginas, anoLancamento, autor } = request.body;
+      const { titulo, sinopse, numPaginas, anoLancamento, autores } = request.body;
 
       const bookExists = await BookRepository.findById(id);
       if(!bookExists) {
@@ -50,8 +50,12 @@ class BookController {
         return response.status(400).json({ error: 'Título obrigatório'});
       }
 
+      if(!autores || autores.length == 0){
+        return response.status(400).json({ error: 'Necessário informar ao menos um autor'});
+      }
+
       const book = await BookRepository.update(id, {
-        titulo, sinopse, numPaginas, anoLancamento, autor
+        titulo, sinopse, numPaginas, anoLancamento, autores
       });
 
       response.json(book);

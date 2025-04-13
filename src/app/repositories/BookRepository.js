@@ -36,26 +36,25 @@ class BookRepository{
     }
 
     async create({titulo, sinopse, numPaginas, anoLancamento, autores }){
-      try{
         await db.query('BEGIN;');
         const [row] = await db.query(`INSERT INTO livro(titulo,sinopse,num_paginas,lancamento) VALUES ($1, $2, $3 ,$4) RETURNING *;`, [titulo, sinopse, numPaginas, anoLancamento]);
 
-        const authorStatements = autores.map((author,index) => `($${index*2+1},$${index*2+2})`);
-        const authorStatementsString = authorStatements.join(",");
+        const authorStatements = autores.map((author,index) => `($${index*2+1},$${index*2+2})`).join(",");
         const values = autores.flatMap((author) => [row.id, author]);
 
-        const authorsData = await db.query(`INSERT INTO autor_livro (id_livro, id_autor) VALUES ${authorStatementsString} RETURNING *;`, values);
+        const authorsData = await db.query(`INSERT INTO autor_livro (id_livro, id_autor) VALUES ${authorStatements} RETURNING *;`, values);
 
         await db.query('COMMIT;');
-        return row;
-      }catch(e){
-        await db.query('ROLLBACK')
-      }
+        const createdBook = {
+            ...row,
+            authors: authorsData
+        };
+        return createdBook;
     }
 
-    async update(id, {
-      titulo, sinopse, numPaginas, anoLancamento, autor
-    }){
+    async update(id, { titulo, sinopse, numPaginas, anoLancamento, autores }){
+      await db.query('BEGIN;');
+
       const [row] = await db.query(`
             UPDATE livro SET
             titulo = $1, sinopse = $2, num_paginas = $3,
@@ -63,7 +62,20 @@ class BookRepository{
             WHERE id = $5
             RETURNING *
         `, [titulo, sinopse, numPaginas, anoLancamento, id]);
-      return row;
+
+      await db.query('DELETE FROM autor_livro WHERE id_livro = $1', [id]);
+
+      const authorStatements = autores.map((author,index) => `($${index*2+1},$${index*2+2})`).join(",");
+      const values = autores.flatMap((author) => [row.id, author]);
+      const authorsData = await db.query(`INSERT INTO autor_livro (id_livro, id_autor) VALUES ${authorStatements} RETURNING *;`, values);
+
+      await db.query('COMMIT;');
+      const updatedBook = {
+          ...row,
+          authors: authorsData
+      };
+
+      return updatedBook;
     }
 
     async delete(id){
