@@ -3,7 +3,7 @@ const AuthorRepository = require('../repositories/AuthorRepository');
 class AuthorController {
 
   async index(request, response){
-   // const authors = await AuthorRepository.findAll();
+    const authors = await AuthorRepository.findAll();
     response.json(authors);
   }
 

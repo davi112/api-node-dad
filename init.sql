@@ -1,4 +1,4 @@
-CREATE DATABASE mybooks;
+--CREATE DATABASE mybooks;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
