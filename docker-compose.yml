@@ -3,9 +3,9 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: mybooks
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=mybooks
     ports:
       - "5434:5432"
     volumes:
@@ -14,8 +14,6 @@ services:
 
   node-app:
     build: .
-    depends_on:
-      - db
     ports:
       - "3000:3000"
     environment:
@@ -23,9 +21,12 @@ services:
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: mybooks
+      DB_PORT: 5432
     volumes:
       - .:/app
     command: node src/index.js
+    depends_on:
+      - db
 
 volumes:
   pgdata:
